@@ -3,7 +3,7 @@ export const CONFIG_FILE_NAME = '.archive.json'; // 配置文件
 export const IOS_NATIVE_DIRECTORY = 'ios'; // iOS 原生项目目录
 
 export interface IConfiguration {
-    workspace: string;
+    xcworkspace: string;
     scheme: string;
     configuration: string;
     archiveDirecotory: string;

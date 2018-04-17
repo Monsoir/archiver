@@ -18,7 +18,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const shell = __importStar(require("shelljs"));
 const utils_1 = require("./utils");
 const constants_1 = require("./constants");
-const path = __importStar(require("path"));
 const ConfigureFilePath = `${process.cwd()}/${constants_1.CONFIG_FILE_NAME}`;
 const archiveiOS = () => __awaiter(this, void 0, void 0, function* () {
     if (!shell.which(constants_1.NEEDED_COMMAND)) {
@@ -31,23 +30,12 @@ const archiveiOS = () => __awaiter(this, void 0, void 0, function* () {
         shell.exit(1);
     }
     const configurations = yield scanConfigurations();
-    const buildArchiveResult = shell.exec(`xcodebuild archive -workspace ${configurations.iosPath}/${configurations.workspace} -scheme ${configurations.scheme} -configuration ${configurations.configuration} -archivePath ${path.resolve(configurations.archiveDirecotory, configurations.archiveFileName)}`);
-    if (buildArchiveResult.code !== 0) {
-        shell.echo(`build archive failed`);
-        shell.exit(1);
-    }
-    const exportArchiveResult = shell.exec(`xcodebuild -exportArchive -archivePath ${path.resolve(configurations.archiveDirecotory, configurations.archiveFileName)}.xcarchive/ -exportPath ${configurations.exportPath} -exportOptionsPlist ${configurations.exportOptionsPlist}`);
-    if (exportArchiveResult.code !== 0) {
-        shell.echo('export failed');
-        shell.exit(0);
-    }
-    shell.echo(`Archive succeeded, export path: ${configurations.exportPath}`);
-    shell.exit(0);
+    console.log(configurations);
 });
 const scanConfigurations = () => __awaiter(this, void 0, void 0, function* () {
     const jsonString = yield utils_1.readFileAsync(ConfigureFilePath);
     const configurations = JSON.parse(jsonString);
-    const checkin = ['workspace', 'scheme', 'exportOptionsPlist'];
+    const checkin = ['xcworkspace', 'scheme', 'exportOptionsPlist'];
     checkin.forEach(checkee => {
         if (!configurations[checkee]) {
             shell.echo(`${checkee} parameter should not be empty`);
@@ -67,9 +55,9 @@ const scanConfigurations = () => __awaiter(this, void 0, void 0, function* () {
         shell.echo(`${configurations.iosPath} directory does not exist`);
         shell.exit(1);
     }
-    const suffix = `.workspace`;
-    if (!configurations.workspace.endsWith(suffix)) {
-        configurations.workspace.concat(suffix);
+    const suffix = `.xcworkspace`;
+    if (!configurations.xcworkspace.endsWith(suffix)) {
+        configurations.xcworkspace = configurations.xcworkspace.concat(suffix);
     }
     configurations.configuration = configurations.configuration || 'Release';
     configurations.archivePath = configurations.archivePath || `./${configurations.scheme}`;
