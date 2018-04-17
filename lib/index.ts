@@ -29,22 +29,21 @@ const archiveiOS = async () => {
     }
 
     const configurations = await scanConfigurations();
-    console.log(configurations);
 
-    // const buildArchiveResult = shell.exec(`xcodebuild archive -workspace ${configurations.iosPath}/${configurations.workspace} -scheme ${configurations.scheme} -configuration ${configurations.configuration} -archivePath ${path.resolve(configurations.archiveDirecotory, configurations.archiveFileName)}`);
-    // if (buildArchiveResult.code !== 0) {
-    //     shell.echo(`build archive failed`);
-    //     shell.exit(1);
-    // }
+    const buildArchiveResult = shell.exec(`xcodebuild archive -workspace ${configurations.iosPath}/${configurations.workspace} -scheme ${configurations.scheme} -configuration ${configurations.configuration} -archivePath ${configurations.archiveDirecotory}/${configurations.archiveFileName}`);
+    if (buildArchiveResult.code !== 0) {
+        shell.echo(`build archive failed`);
+        shell.exit(1);
+    }
 
-    // const exportArchiveResult = shell.exec(`xcodebuild -exportArchive -archivePath ${path.resolve(configurations.archiveDirecotory, configurations.archiveFileName)}.xcarchive/ -exportPath ${configurations.exportPath} -exportOptionsPlist ${configurations.exportOptionsPlist}`);
-    // if (exportArchiveResult.code !== 0) {
-    //     shell.echo('export failed');
-    //     shell.exit(0);
-    // }
+    const exportArchiveResult = shell.exec(`xcodebuild -exportArchive -archivePath ${path.resolve(configurations.archiveDirecotory, configurations.archiveFileName)}.xcarchive/ -exportPath ${configurations.exportPath} -exportOptionsPlist ${configurations.exportOptionsPlist}`);
+    if (exportArchiveResult.code !== 0) {
+        shell.echo('export failed');
+        shell.exit(0);
+    }
 
-    // shell.echo(`Archive succeeded, export path: ${configurations.exportPath}`);
-    // shell.exit(0);
+    shell.echo(`Archive succeeded, export path: ${configurations.exportPath}`);
+    shell.exit(0);
 };
 
 const scanConfigurations = async (): Promise<IConfiguration> => {
