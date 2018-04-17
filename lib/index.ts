@@ -1,5 +1,6 @@
+import * as fs from 'fs';
 import * as shell from 'shelljs';
-import { testFileExists } from './utils';
+import { testFileExists, readFileAsync } from './utils';
 import { NEEDED_COMMAND, CONFIG_FILE_NAME, IOS_NATIVE_DIRECTORY, IConfiguration } from './constants';
 
 /**
@@ -10,6 +11,8 @@ import { NEEDED_COMMAND, CONFIG_FILE_NAME, IOS_NATIVE_DIRECTORY, IConfiguration 
  * 5. export
  */
 
+const ConfigureFilePath = `${process.cwd()}/${CONFIG_FILE_NAME}`;
+
 const archiveiOS = async () => {
     // 检查 xcodebuild 命令是否存在
     if (!shell.which(NEEDED_COMMAND)) {
@@ -18,7 +21,7 @@ const archiveiOS = async () => {
     }
 
     // 检查配置文件是否存在
-    const configFileExists = await testFileExists(`${process.cwd()}/${CONFIG_FILE_NAME}`);
+    const configFileExists = await testFileExists(ConfigureFilePath);
     if (!configFileExists) {
         shell.echo(`${CONFIG_FILE_NAME} does not exist`);
         shell.exit(1);
@@ -31,7 +34,7 @@ const archiveiOS = async () => {
         shell.exit(1);
     }
 
-    const configurations = scanConfigurations();
+    const configurations = await scanConfigurations();
 
     const buildArchiveResult = shell.exec(`xcodebuild archive -workspace ${configurations.workspace} -scheme ${configurations.scheme} -configuration ${configurations.configuration} -archivePath ${configurations.archivePath}`);
     if (!buildArchiveResult) {
@@ -49,8 +52,9 @@ const archiveiOS = async () => {
     shell.exit(0);
 };
 
-const scanConfigurations = (): IConfiguration => {
-    const configurations: IConfiguration = JSON.parse(CONFIG_FILE_NAME);
+const scanConfigurations = async (): Promise<IConfiguration> => {
+    const jsonString = await readFileAsync(ConfigureFilePath);
+    const configurations: IConfiguration = JSON.parse(jsonString);
     const checkin = ['workspace', 'scheme', 'exportOptionsPlist'];
     checkin.forEach(checkee => {
         if (!configurations[checkee]) {

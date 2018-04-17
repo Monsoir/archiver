@@ -16,3 +16,15 @@ exports.testFileExists = (path) => __awaiter(this, void 0, void 0, function* () 
         });
     });
 });
+exports.readFileAsync = (path) => __awaiter(this, void 0, void 0, function* () {
+    return new Promise((resovle, reject) => {
+        fs_1.readFile(path, 'utf8', (err, data) => {
+            if (err) {
+                reject(err);
+            }
+            else {
+                resovle(data);
+            }
+        });
+    });
+});

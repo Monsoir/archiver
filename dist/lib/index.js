@@ -18,12 +18,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const shell = __importStar(require("shelljs"));
 const utils_1 = require("./utils");
 const constants_1 = require("./constants");
+const ConfigureFilePath = `${process.cwd()}/${constants_1.CONFIG_FILE_NAME}`;
 const archiveiOS = () => __awaiter(this, void 0, void 0, function* () {
     if (!shell.which(constants_1.NEEDED_COMMAND)) {
         shell.echo(`${constants_1.NEEDED_COMMAND} command does not exist`);
         shell.exit(1);
     }
-    const configFileExists = yield utils_1.testFileExists(`${process.cwd()}/${constants_1.CONFIG_FILE_NAME}`);
+    const configFileExists = yield utils_1.testFileExists(ConfigureFilePath);
     if (!configFileExists) {
         shell.echo(`${constants_1.CONFIG_FILE_NAME} does not exist`);
         shell.exit(1);
@@ -33,7 +34,7 @@ const archiveiOS = () => __awaiter(this, void 0, void 0, function* () {
         shell.echo(`${constants_1.IOS_NATIVE_DIRECTORY} directory does not exist`);
         shell.exit(1);
     }
-    const configurations = scanConfigurations();
+    const configurations = yield scanConfigurations();
     const buildArchiveResult = shell.exec(`xcodebuild archive -workspace ${configurations.workspace} -scheme ${configurations.scheme} -configuration ${configurations.configuration} -archivePath ${configurations.archivePath}`);
     if (!buildArchiveResult) {
         shell.echo('Archive build failed');
@@ -47,8 +48,9 @@ const archiveiOS = () => __awaiter(this, void 0, void 0, function* () {
     shell.echo(`Archive succeeded, export path: ${configurations.exportPath}`);
     shell.exit(0);
 });
-const scanConfigurations = () => {
-    const configurations = JSON.parse(constants_1.CONFIG_FILE_NAME);
+const scanConfigurations = () => __awaiter(this, void 0, void 0, function* () {
+    const jsonString = yield utils_1.readFileAsync(ConfigureFilePath);
+    const configurations = JSON.parse(jsonString);
     const checkin = ['workspace', 'scheme', 'exportOptionsPlist'];
     checkin.forEach(checkee => {
         if (!configurations[checkee]) {
@@ -64,5 +66,5 @@ const scanConfigurations = () => {
     configurations.archivePath = configurations.archivePath || `./${configurations.scheme}`;
     configurations.exportPath = configurations.exportPath || `./archived`;
     return configurations;
-};
+});
 archiveiOS();
