@@ -30,7 +30,18 @@ const archiveiOS = () => __awaiter(this, void 0, void 0, function* () {
         shell.exit(1);
     }
     const configurations = yield scanConfigurations();
-    console.log(configurations);
+    const buildArchiveResult = shell.exec(`xcodebuild archive -workspace ${configurations.workspace} -scheme ${configurations.scheme} -configuration ${configurations.configuration} -archivePath ${configurations.archivePath}`);
+    if (buildArchiveResult.code !== 0) {
+        shell.echo(`build archive failed`);
+        shell.exit(1);
+    }
+    const exportArchiveResult = shell.exec(`xcodebuild -exportArchive -archivePath ${configurations.archivePath} -exportPath ${configurations.exportPath} -exportOptionsPlist ${configurations.exportOptionsPlist}`);
+    if (exportArchiveResult.code !== 0) {
+        shell.echo('export failed');
+        shell.exit(0);
+    }
+    shell.echo(`Archive succeeded, export path: ${configurations.exportPath}`);
+    shell.exit(0);
 });
 const scanConfigurations = () => __awaiter(this, void 0, void 0, function* () {
     const jsonString = yield utils_1.readFileAsync(ConfigureFilePath);
@@ -43,7 +54,6 @@ const scanConfigurations = () => __awaiter(this, void 0, void 0, function* () {
         }
     });
     configurations.iosPath = configurations.iosPath || `${process.cwd()}/ios`;
-    console.log(configurations.iosPath);
     let iosProjectExists = false;
     try {
         iosProjectExists = yield utils_1.testDirectoryExists(configurations.iosPath);

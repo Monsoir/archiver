@@ -30,14 +30,14 @@ const archiveiOS = async () => {
     const configurations = await scanConfigurations();
 
     const buildArchiveResult = shell.exec(`xcodebuild archive -workspace ${configurations.workspace} -scheme ${configurations.scheme} -configuration ${configurations.configuration} -archivePath ${configurations.archivePath}`);
-    if (!buildArchiveResult) {
-        shell.echo('Archive build failed');
+    if (buildArchiveResult.code !== 0) {
+        shell.echo(`build archive failed`);
         shell.exit(1);
     }
 
     const exportArchiveResult = shell.exec(`xcodebuild -exportArchive -archivePath ${configurations.archivePath} -exportPath ${configurations.exportPath} -exportOptionsPlist ${configurations.exportOptionsPlist}`);
-    if (!exportArchiveResult) {
-        shell.echo('Archive export failed');
+    if (exportArchiveResult.code !== 0) {
+        shell.echo('export failed');
         shell.exit(0);
     }
 
