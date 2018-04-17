@@ -30,18 +30,7 @@ const archiveiOS = () => __awaiter(this, void 0, void 0, function* () {
         shell.exit(1);
     }
     const configurations = yield scanConfigurations();
-    const buildArchiveResult = shell.exec(`xcodebuild archive -workspace ${configurations.workspace} -scheme ${configurations.scheme} -configuration ${configurations.configuration} -archivePath ${configurations.archivePath}`);
-    if (!buildArchiveResult) {
-        shell.echo('Archive build failed');
-        shell.exit(1);
-    }
-    const exportArchiveResult = shell.exec(`xcodebuild -exportArchive -archivePath ${configurations.archivePath} -exportPath ${configurations.exportPath} -exportOptionsPlist ${configurations.exportOptionsPlist}`);
-    if (!exportArchiveResult) {
-        shell.echo('Archive export failed');
-        shell.exit(0);
-    }
-    shell.echo(`Archive succeeded, export path: ${configurations.exportPath}`);
-    shell.exit(0);
+    console.log(configurations);
 });
 const scanConfigurations = () => __awaiter(this, void 0, void 0, function* () {
     const jsonString = yield utils_1.readFileAsync(ConfigureFilePath);
@@ -54,9 +43,17 @@ const scanConfigurations = () => __awaiter(this, void 0, void 0, function* () {
         }
     });
     configurations.iosPath = configurations.iosPath || `${process.cwd()}/ios`;
-    const iosProjectExists = yield utils_1.testFileExists(configurations.iosPath);
+    console.log(configurations.iosPath);
+    let iosProjectExists = false;
+    try {
+        iosProjectExists = yield utils_1.testDirectoryExists(configurations.iosPath);
+    }
+    catch (e) {
+        shell.echo(`${configurations.iosPath} directory does not exist`);
+        shell.exit(1);
+    }
     if (!iosProjectExists) {
-        shell.echo(`${constants_1.IOS_NATIVE_DIRECTORY} directory does not exist`);
+        shell.echo(`${configurations.iosPath} directory does not exist`);
         shell.exit(1);
     }
     const suffix = `.workspace`;

@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as shell from 'shelljs';
-import { testFileExists, readFileAsync } from './utils';
+import { testFileExists, readFileAsync, testDirectoryExists } from './utils';
 import { NEEDED_COMMAND, CONFIG_FILE_NAME, IOS_NATIVE_DIRECTORY, IConfiguration } from './constants';
 
 /**
@@ -58,9 +58,15 @@ const scanConfigurations = async (): Promise<IConfiguration> => {
 
     // 检查 iOS 原生项目目录是否存在
     configurations.iosPath = configurations.iosPath || `${process.cwd()}/ios`;
-    const iosProjectExists = await testFileExists(configurations.iosPath);
+    let iosProjectExists = false;
+    try {
+        iosProjectExists = await testDirectoryExists(configurations.iosPath);
+    } catch (e) {
+        shell.echo(`${configurations.iosPath} directory does not exist`);
+        shell.exit(1);
+    }
     if (!iosProjectExists) {
-        shell.echo(`${IOS_NATIVE_DIRECTORY} directory does not exist`);
+        shell.echo(`${configurations.iosPath} directory does not exist`);
         shell.exit(1);
     }
 
