@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as shell from 'shelljs';
 import { testFileExists, readFileAsync, testDirectoryExists } from './utils';
 import { NEEDED_COMMAND, CONFIG_FILE_NAME, IOS_NATIVE_DIRECTORY, IConfiguration } from './constants';
+import * as path from 'path';
 
 /**
  * 1. 检查 xcodebuild 命令是否存在
@@ -29,13 +30,13 @@ const archiveiOS = async () => {
 
     const configurations = await scanConfigurations();
 
-    const buildArchiveResult = shell.exec(`xcodebuild archive -workspace ${configurations.workspace} -scheme ${configurations.scheme} -configuration ${configurations.configuration} -archivePath ${configurations.archivePath}`);
+    const buildArchiveResult = shell.exec(`xcodebuild archive -workspace ${configurations.iosPath}/${configurations.workspace} -scheme ${configurations.scheme} -configuration ${configurations.configuration} -archivePath ${path.resolve(configurations.archiveDirecotory, configurations.archiveFileName)}`);
     if (buildArchiveResult.code !== 0) {
         shell.echo(`build archive failed`);
         shell.exit(1);
     }
 
-    const exportArchiveResult = shell.exec(`xcodebuild -exportArchive -archivePath ${configurations.archivePath} -exportPath ${configurations.exportPath} -exportOptionsPlist ${configurations.exportOptionsPlist}`);
+    const exportArchiveResult = shell.exec(`xcodebuild -exportArchive -archivePath ${path.resolve(configurations.archiveDirecotory, configurations.archiveFileName)}.xcarchive/ -exportPath ${configurations.exportPath} -exportOptionsPlist ${configurations.exportOptionsPlist}`);
     if (exportArchiveResult.code !== 0) {
         shell.echo('export failed');
         shell.exit(0);

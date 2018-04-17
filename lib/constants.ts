@@ -6,7 +6,8 @@ export interface IConfiguration {
     workspace: string;
     scheme: string;
     configuration: string;
-    archivePath: string;
+    archiveDirecotory: string;
+    archiveFileName: string;
     exportPath: string;
     exportOptionsPlist: string;
     iosPath: string;

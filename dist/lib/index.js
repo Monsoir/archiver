@@ -18,6 +18,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const shell = __importStar(require("shelljs"));
 const utils_1 = require("./utils");
 const constants_1 = require("./constants");
+const path = __importStar(require("path"));
 const ConfigureFilePath = `${process.cwd()}/${constants_1.CONFIG_FILE_NAME}`;
 const archiveiOS = () => __awaiter(this, void 0, void 0, function* () {
     if (!shell.which(constants_1.NEEDED_COMMAND)) {
@@ -30,12 +31,12 @@ const archiveiOS = () => __awaiter(this, void 0, void 0, function* () {
         shell.exit(1);
     }
     const configurations = yield scanConfigurations();
-    const buildArchiveResult = shell.exec(`xcodebuild archive -workspace ${configurations.workspace} -scheme ${configurations.scheme} -configuration ${configurations.configuration} -archivePath ${configurations.archivePath}`);
+    const buildArchiveResult = shell.exec(`xcodebuild archive -workspace ${configurations.iosPath}/${configurations.workspace} -scheme ${configurations.scheme} -configuration ${configurations.configuration} -archivePath ${path.resolve(configurations.archiveDirecotory, configurations.archiveFileName)}`);
     if (buildArchiveResult.code !== 0) {
         shell.echo(`build archive failed`);
         shell.exit(1);
     }
-    const exportArchiveResult = shell.exec(`xcodebuild -exportArchive -archivePath ${configurations.archivePath} -exportPath ${configurations.exportPath} -exportOptionsPlist ${configurations.exportOptionsPlist}`);
+    const exportArchiveResult = shell.exec(`xcodebuild -exportArchive -archivePath ${path.resolve(configurations.archiveDirecotory, configurations.archiveFileName)}.xcarchive/ -exportPath ${configurations.exportPath} -exportOptionsPlist ${configurations.exportOptionsPlist}`);
     if (exportArchiveResult.code !== 0) {
         shell.echo('export failed');
         shell.exit(0);

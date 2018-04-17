@@ -2,7 +2,8 @@
     "workspace": "",
     "scheme": "",
     "configuration": "Release",
-    "archivePath": "",
+    "archiveDirecotory": "",
+    "archiveFileName": "",
     "exportPath": "",
     "exportOptionsPlist": "",
 
