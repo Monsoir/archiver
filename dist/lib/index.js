@@ -29,11 +29,6 @@ const archiveiOS = () => __awaiter(this, void 0, void 0, function* () {
         shell.echo(`${constants_1.CONFIG_FILE_NAME} does not exist`);
         shell.exit(1);
     }
-    const iosProjectExists = yield utils_1.testFileExists(constants_1.IOS_NATIVE_DIRECTORY);
-    if (!iosProjectExists) {
-        shell.echo(`${constants_1.IOS_NATIVE_DIRECTORY} directory does not exist`);
-        shell.exit(1);
-    }
     const configurations = yield scanConfigurations();
     const buildArchiveResult = shell.exec(`xcodebuild archive -workspace ${configurations.workspace} -scheme ${configurations.scheme} -configuration ${configurations.configuration} -archivePath ${configurations.archivePath}`);
     if (!buildArchiveResult) {
@@ -58,6 +53,12 @@ const scanConfigurations = () => __awaiter(this, void 0, void 0, function* () {
             shell.exit(1);
         }
     });
+    configurations.iosPath = configurations.iosPath || `${process.cwd()}/ios`;
+    const iosProjectExists = yield utils_1.testFileExists(configurations.iosPath);
+    if (!iosProjectExists) {
+        shell.echo(`${constants_1.IOS_NATIVE_DIRECTORY} directory does not exist`);
+        shell.exit(1);
+    }
     const suffix = `.workspace`;
     if (!configurations.workspace.endsWith(suffix)) {
         configurations.workspace.concat(suffix);

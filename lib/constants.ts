@@ -9,5 +9,6 @@ export interface IConfiguration {
     archivePath: string;
     exportPath: string;
     exportOptionsPlist: string;
+    iosPath: string;
     [key: string]: string;
 }

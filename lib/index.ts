@@ -27,13 +27,6 @@ const archiveiOS = async () => {
         shell.exit(1);
     }
 
-    // 检查 iOS 原生项目目录是否存在
-    const iosProjectExists = await testFileExists(IOS_NATIVE_DIRECTORY);
-    if (!iosProjectExists) {
-        shell.echo(`${IOS_NATIVE_DIRECTORY} directory does not exist`);
-        shell.exit(1);
-    }
-
     const configurations = await scanConfigurations();
 
     const buildArchiveResult = shell.exec(`xcodebuild archive -workspace ${configurations.workspace} -scheme ${configurations.scheme} -configuration ${configurations.configuration} -archivePath ${configurations.archivePath}`);
@@ -63,12 +56,21 @@ const scanConfigurations = async (): Promise<IConfiguration> => {
         }
     });
 
+    // 检查 iOS 原生项目目录是否存在
+    configurations.iosPath = configurations.iosPath || `${process.cwd()}/ios`;
+    const iosProjectExists = await testFileExists(configurations.iosPath);
+    if (!iosProjectExists) {
+        shell.echo(`${IOS_NATIVE_DIRECTORY} directory does not exist`);
+        shell.exit(1);
+    }
+
     // 补全后缀名
     const suffix = `.workspace`;
     if (!configurations.workspace.endsWith(suffix)) {
         configurations.workspace.concat(suffix);
     }
 
+    // 设置默认值
     configurations.configuration = configurations.configuration || 'Release';
     configurations.archivePath = configurations.archivePath || `./${configurations.scheme}`
     configurations.exportPath = configurations.exportPath || `./archived`;
