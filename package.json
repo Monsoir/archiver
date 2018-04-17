@@ -1,6 +1,6 @@
 {
   "name": "rn-archiver",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "main": "dist/lib/index.js",
   "bin": {
@@ -10,7 +10,11 @@
     "start": "./node_modules/typescript/bin/tsc && node ./dist/lib/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["react native", "ios", "archive"],
+  "keywords": [
+    "react native",
+    "ios",
+    "archive"
+  ],
   "author": "Wen Yongyang <monwingyeung@gmail.com>",
   "license": "ISC",
   "dependencies": {
