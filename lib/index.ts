@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import * as shell from 'shelljs';
 import { testFileExists, readFileAsync, testDirectoryExists } from './utils';
 import { NEEDED_COMMAND, CONFIG_FILE_NAME, IOS_NATIVE_DIRECTORY, IConfiguration } from './constants';
-import * as path from 'path';
 
 /**
  * 1. 检查 xcodebuild 命令是否存在
@@ -30,13 +29,13 @@ const archiveiOS = async () => {
 
     const configurations = await scanConfigurations();
 
-    const buildArchiveResult = shell.exec(`xcodebuild archive -workspace ${configurations.iosPath}/${configurations.workspace} -scheme ${configurations.scheme} -configuration ${configurations.configuration} -archivePath ${configurations.archiveDirecotory}/${configurations.archiveFileName}`);
+    const buildArchiveResult = shell.exec(`xcodebuild archive -workspace ${configurations.pathToWorkspace} -scheme ${configurations.scheme} -configuration ${configurations.configuration} -archivePath ${configurations.archivePath}`);
     if (buildArchiveResult.code !== 0) {
         shell.echo(`build archive failed`);
         shell.exit(1);
     }
 
-    const exportArchiveResult = shell.exec(`xcodebuild -exportArchive -archivePath ${path.resolve(configurations.archiveDirecotory, configurations.archiveFileName)}.xcarchive/ -exportPath ${configurations.exportPath} -exportOptionsPlist ${configurations.exportOptionsPlist}`);
+    const exportArchiveResult = shell.exec(`xcodebuild -exportArchive -archivePath ${configurations.archivePath}`);
     if (exportArchiveResult.code !== 0) {
         shell.echo('export failed');
         shell.exit(0);
@@ -49,33 +48,13 @@ const archiveiOS = async () => {
 const scanConfigurations = async (): Promise<IConfiguration> => {
     const jsonString = await readFileAsync(ConfigureFilePath);
     const configurations: IConfiguration = JSON.parse(jsonString);
-    const checkin = ['xcworkspace', 'scheme', 'exportOptionsPlist'];
+    const checkin = ['pathToWorkspace', 'scheme', 'exportOptionsPlist'];
     checkin.forEach(checkee => {
         if (!configurations[checkee]) {
             shell.echo(`${checkee} parameter should not be empty`);
             shell.exit(1);
         }
     });
-
-    // 检查 iOS 原生项目目录是否存在
-    configurations.iosPath = configurations.iosPath || `${process.cwd()}/ios`;
-    let iosProjectExists = false;
-    try {
-        iosProjectExists = await testDirectoryExists(configurations.iosPath);
-    } catch (e) {
-        shell.echo(`${configurations.iosPath} directory does not exist`);
-        shell.exit(1);
-    }
-    if (!iosProjectExists) {
-        shell.echo(`${configurations.iosPath} directory does not exist`);
-        shell.exit(1);
-    }
-
-    // 补全后缀名
-    const suffix = `.xcworkspace`;
-    if (!configurations.xcworkspace.endsWith(suffix)) {
-        configurations.xcworkspace = configurations.xcworkspace.concat(suffix);
-    }
 
     // 设置默认值
     configurations.configuration = configurations.configuration || 'Release';

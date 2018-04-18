@@ -18,7 +18,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const shell = __importStar(require("shelljs"));
 const utils_1 = require("./utils");
 const constants_1 = require("./constants");
-const path = __importStar(require("path"));
 const ConfigureFilePath = `${process.cwd()}/${constants_1.CONFIG_FILE_NAME}`;
 const archiveiOS = () => __awaiter(this, void 0, void 0, function* () {
     if (!shell.which(constants_1.NEEDED_COMMAND)) {
@@ -31,12 +30,12 @@ const archiveiOS = () => __awaiter(this, void 0, void 0, function* () {
         shell.exit(1);
     }
     const configurations = yield scanConfigurations();
-    const buildArchiveResult = shell.exec(`xcodebuild archive -workspace ${configurations.iosPath}/${configurations.workspace} -scheme ${configurations.scheme} -configuration ${configurations.configuration} -archivePath ${configurations.archiveDirecotory}/${configurations.archiveFileName}`);
+    const buildArchiveResult = shell.exec(`xcodebuild archive -workspace ${configurations.pathToWorkspace} -scheme ${configurations.scheme} -configuration ${configurations.configuration} -archivePath ${configurations.archivePath}`);
     if (buildArchiveResult.code !== 0) {
         shell.echo(`build archive failed`);
         shell.exit(1);
     }
-    const exportArchiveResult = shell.exec(`xcodebuild -exportArchive -archivePath ${path.resolve(configurations.archiveDirecotory, configurations.archiveFileName)}.xcarchive/ -exportPath ${configurations.exportPath} -exportOptionsPlist ${configurations.exportOptionsPlist}`);
+    const exportArchiveResult = shell.exec(`xcodebuild -exportArchive -archivePath ${configurations.archivePath}`);
     if (exportArchiveResult.code !== 0) {
         shell.echo('export failed');
         shell.exit(0);
@@ -47,30 +46,13 @@ const archiveiOS = () => __awaiter(this, void 0, void 0, function* () {
 const scanConfigurations = () => __awaiter(this, void 0, void 0, function* () {
     const jsonString = yield utils_1.readFileAsync(ConfigureFilePath);
     const configurations = JSON.parse(jsonString);
-    const checkin = ['xcworkspace', 'scheme', 'exportOptionsPlist'];
+    const checkin = ['pathToWorkspace', 'scheme', 'exportOptionsPlist'];
     checkin.forEach(checkee => {
         if (!configurations[checkee]) {
             shell.echo(`${checkee} parameter should not be empty`);
             shell.exit(1);
         }
     });
-    configurations.iosPath = configurations.iosPath || `${process.cwd()}/ios`;
-    let iosProjectExists = false;
-    try {
-        iosProjectExists = yield utils_1.testDirectoryExists(configurations.iosPath);
-    }
-    catch (e) {
-        shell.echo(`${configurations.iosPath} directory does not exist`);
-        shell.exit(1);
-    }
-    if (!iosProjectExists) {
-        shell.echo(`${configurations.iosPath} directory does not exist`);
-        shell.exit(1);
-    }
-    const suffix = `.xcworkspace`;
-    if (!configurations.xcworkspace.endsWith(suffix)) {
-        configurations.xcworkspace = configurations.xcworkspace.concat(suffix);
-    }
     configurations.configuration = configurations.configuration || 'Release';
     configurations.archivePath = configurations.archivePath || `./${configurations.scheme}`;
     configurations.exportPath = configurations.exportPath || `./archived`;
