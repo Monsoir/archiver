@@ -2,10 +2,7 @@
     "pathToWorkspace": "",
     "scheme": "",
     "configuration": "Release",
-    "archiveDirecotory": "",
-    "archiveFileName": "",
+    "archivePath": "",
     "exportPath": "",
-    "exportOptionsPlist": "",
-
-    "iosPath": ""
+    "exportOptionsPlist": ""
 }

@@ -35,7 +35,7 @@ const archiveiOS = async () => {
         shell.exit(1);
     }
 
-    const exportArchiveResult = shell.exec(`xcodebuild -exportArchive -archivePath ${configurations.archivePath}`);
+    const exportArchiveResult = shell.exec(`xcodebuild -exportArchive -archivePath ${configurations.archivePath}.xcarchive -exportPath ${configurations.exportPath} -exportOptionsPlist ${configurations.exportOptionsPlist}`);
     if (exportArchiveResult.code !== 0) {
         shell.echo('export failed');
         shell.exit(0);
