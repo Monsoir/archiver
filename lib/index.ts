@@ -3,14 +3,16 @@ import * as shell from 'shelljs';
 import { testFileExists, readFileAsync, testDirectoryExists } from './utils';
 import { NEEDED_COMMAND, CONFIG_FILE_NAME, IOS_NATIVE_DIRECTORY, IConfiguration } from './constants';
 
-/**
- * 1. 检查 xcodebuild 命令是否存在
- * 2. 检查 .archive.json 是否存在
- * 3. 检查 iOS 原生项目是否存在
- * 4. archive
- * 5. export
- */
+// /**
+//  * - 检查 xcodebuild 命令是否存在
+//  * - 检查 .archive.json 是否存在
+//  * - archive
+//  * - export
+//  */
 
+/**
+ * 配置文件路径
+ */
 const ConfigureFilePath = `${process.cwd()}/${CONFIG_FILE_NAME}`;
 
 const archiveiOS = async () => {
